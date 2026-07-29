@@ -60,6 +60,12 @@ export default function SignIn() {
           value={password}
           onChangeText={setPassword}
         />
+        <Text
+          style={s.forgotPassword}
+          onPress={() => router.push('/(auth)/forgot-password')}
+        >
+          Forgot Password?
+        </Text>
 
         {localError || errorMsg ? (
           <Text style={s.error}>{localError || errorMsg}</Text>
@@ -87,5 +93,13 @@ const s = StyleSheet.create({
     color: C.red,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  forgotPassword: {
+    alignSelf: 'flex-end',
+    marginRight: 20,
+    marginTop: 8,
+    marginBottom: 16,
+    color: 'blue',
+    fontWeight: '600',
   },
 });

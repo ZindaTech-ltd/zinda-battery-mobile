@@ -2,8 +2,10 @@ import AuthButton from '@/components/auth/AuthButton';
 import AuthFooterLink from '@/components/auth/AuthFooterLink';
 import AuthHeader from '@/components/auth/AuthHeader';
 import AuthInput from '@/components/auth/AuthInput';
+import PasswordStrengthMeter from '@/components/auth/PasswordStrengthMeter';
 import { C } from '@/constants/batteryTheme';
 import { useAuth } from '@/hooks/use-auth';
+import { isValidEmail } from '@/utils/validators';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -23,16 +25,27 @@ export default function SignUp() {
   const [localError, setLocalError] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const { signUp, loading, errorMsg } = useAuth();
-  // Clear the error message after 2 seconds
+
   useEffect(() => {
     if (!localError) return;
     const timer = setTimeout(() => setLocalError(''), 2000);
     return () => clearTimeout(timer);
   }, [localError]);
-  // sign up handler
+
+  const emailError =
+    email && !isValidEmail(email) ? 'Enter a valid email address' : '';
+  const confirmError =
+    confirmPassword && password !== confirmPassword
+      ? 'Passwords do not match'
+      : '';
+
   async function handleSignUp() {
-    if (!email || !password) {
-      setLocalError('Email and password are required');
+    if (!email || !password || !confirmPassword) {
+      setLocalError('All fields are required');
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setLocalError('Enter a valid email address');
       return;
     }
     if (password !== confirmPassword) {
@@ -64,7 +77,7 @@ export default function SignUp() {
       </View>
     );
   }
-  // jsx
+
   return (
     <KeyboardAvoidingView
       style={s.root}
@@ -83,6 +96,7 @@ export default function SignUp() {
           keyboardType="email-address"
           value={email}
           onChangeText={setEmail}
+          error={emailError}
         />
         <AuthInput
           label="Password"
@@ -91,12 +105,15 @@ export default function SignUp() {
           value={password}
           onChangeText={setPassword}
         />
+        <PasswordStrengthMeter password={password} />
+
         <AuthInput
           label="Confirm Password"
           placeholder="••••••••"
           secureTextEntry
           value={confirmPassword}
           onChangeText={setConfirmPassword}
+          error={confirmError}
         />
 
         {localError || errorMsg ? (
