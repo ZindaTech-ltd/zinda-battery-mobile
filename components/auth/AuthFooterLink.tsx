@@ -1,7 +1,7 @@
 import { C } from '@/constants/batteryTheme';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
+// AuthFooterLink component with props for prompt, action label, and onPress handler
 export default function AuthFooterLink({
   prompt,
   actionLabel,

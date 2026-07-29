@@ -5,7 +5,7 @@ import AuthInput from '@/components/auth/AuthInput';
 import { C } from '@/constants/batteryTheme';
 import { useAuth } from '@/hooks/use-auth';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -19,13 +19,24 @@ import {
 export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [localError, setLocalError] = useState('');
   const { signIn, loading, errorMsg } = useAuth();
+  // Clear the error message after 2 seconds
+  useEffect(() => {
+    if (!localError) return;
+    const timer = setTimeout(() => setLocalError(''), 2000);
+    return () => clearTimeout(timer);
+  }, [localError]);
 
   async function handleSignIn() {
+    if (!email || !password) {
+      setLocalError('Email and password are required');
+      return;
+    }
     const ok = await signIn(email, password);
     if (ok) router.replace('/(tabs)');
   }
-
+  // jsx
   return (
     <KeyboardAvoidingView
       style={s.root}
@@ -50,7 +61,9 @@ export default function SignIn() {
           onChangeText={setPassword}
         />
 
-        {errorMsg ? <Text style={s.error}>{errorMsg}</Text> : null}
+        {localError || errorMsg ? (
+          <Text style={s.error}>{localError || errorMsg}</Text>
+        ) : null}
 
         <AuthButton label="Sign In" onPress={handleSignIn} loading={loading} />
 

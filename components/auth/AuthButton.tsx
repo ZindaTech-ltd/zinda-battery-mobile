@@ -6,7 +6,7 @@ import {
   Text,
   TouchableOpacity,
 } from 'react-native';
-
+// AuthButton component with props for label, onPress handler, loading state, and disabled state
 export default function AuthButton({
   label,
   onPress,

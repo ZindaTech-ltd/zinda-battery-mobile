@@ -5,7 +5,7 @@ import AuthInput from '@/components/auth/AuthInput';
 import { C } from '@/constants/batteryTheme';
 import { useAuth } from '@/hooks/use-auth';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -21,18 +21,50 @@ export default function SignUp() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [localError, setLocalError] = useState('');
+  const [submitted, setSubmitted] = useState(false);
   const { signUp, loading, errorMsg } = useAuth();
-
+  // Clear the error message after 2 seconds
+  useEffect(() => {
+    if (!localError) return;
+    const timer = setTimeout(() => setLocalError(''), 2000);
+    return () => clearTimeout(timer);
+  }, [localError]);
+  // sign up handler
   async function handleSignUp() {
+    if (!email || !password) {
+      setLocalError('Email and password are required');
+      return;
+    }
     if (password !== confirmPassword) {
       setLocalError('Passwords do not match');
       return;
     }
     setLocalError('');
     const ok = await signUp(email, password);
-    if (ok) router.replace('/(tabs)');
+    if (ok) setSubmitted(true);
   }
 
+  if (submitted) {
+    return (
+      <View style={s.root}>
+        <StatusBar barStyle="dark-content" backgroundColor={C.bg} />
+        <AuthHeader
+          title="Check your email"
+          subtitle="Verify your account to continue"
+        />
+        <Text style={s.confirmText}>
+          We sent a verification link to {'\n'}
+          <Text style={s.confirmEmail}>{email}</Text>
+          {'\n\n'}Verify your email, then sign in below.
+        </Text>
+        <AuthButton
+          label="Go to Sign In"
+          onPress={() => router.replace('/(auth)/sign-in')}
+        />
+      </View>
+    );
+  }
+  // jsx
   return (
     <KeyboardAvoidingView
       style={s.root}
@@ -94,4 +126,14 @@ const s = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
+  confirmText: {
+    marginHorizontal: 20,
+    marginTop: 8,
+    fontSize: 13,
+    color: C.muted,
+    fontWeight: '500',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  confirmEmail: { color: C.ink, fontWeight: '700' },
 });

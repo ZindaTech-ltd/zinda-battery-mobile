@@ -2,7 +2,7 @@ import { C } from '@/constants/batteryTheme';
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import ZindaLogo from '../../assets/images/logo.png';
-
+// AuthHeader component with props for title and subtitle
 export default function AuthHeader({
   title,
   subtitle,
