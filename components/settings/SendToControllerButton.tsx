@@ -1,6 +1,7 @@
 import { C } from '@/constants/batteryTheme';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import LogoutButton from '../auth/LogoutButton';
 
 export default function SendToControllerButton({
   onPress,
@@ -8,9 +9,12 @@ export default function SendToControllerButton({
   onPress: () => void;
 }) {
   return (
-    <TouchableOpacity style={s.button} onPress={onPress}>
-      <Text style={s.text}>Set</Text>
-    </TouchableOpacity>
+    <>
+      <TouchableOpacity style={s.button} onPress={onPress}>
+        <Text style={s.text}>Set</Text>
+      </TouchableOpacity>
+      <LogoutButton />
+    </>
   );
 }
 
