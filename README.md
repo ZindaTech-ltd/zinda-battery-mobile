@@ -1,50 +1,67 @@
-# Welcome to your Expo app 👋
+# ZindaBattery Mobile App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+React Native (Expo) mobile app for the ZindaBattery IoT lead-acid battery monitoring system. This app connects to an ESP32-based battery monitor via Bluetooth Low Energy (BLE) for WiFi provisioning, and displays live battery telemetry, history, and trends.
 
-## Get started
+> **Note:** This README currently covers the React Native / Expo setup only. Backend (Supabase) documentation will be added once that integration is built.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## Tech Stack
 
-2. Start the app
+- **React Native** — cross-platform mobile framework (JS/React)
+- **Expo** — toolchain on top of React Native (managed build system, native modules, EAS Build)
+- **Expo Router** — file-based navigation
+- **TypeScript**
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## Why Expo (and not bare React Native)
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Expo gives us:
+- A managed build system (`app.json`, EAS Build) so we don't touch native Android/iOS code directly for most features
+- Pre-built modules for common native features (notifications, camera, etc.)
+- EAS Build — a cloud build service, so we can produce installable app builds without a local Mac (needed for iOS)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## Expo Go vs. Expo Dev Build
 
-When you're ready, run:
+Expo has two ways to run the app during development:
+
+| | Expo Go | Expo Dev Build |
+|---|---|---|
+| What it is | Pre-built app from the app store | Custom-built version of this specific app |
+| Native modules | Only Expo Go's fixed built-in set | Any native module we add |
+| Setup | Instant, no build needed | Needs a build (once per new native module) |
+| Hot reload | Yes | Yes |
+
+**This project uses Expo Go for now.** The current app (dashboard UI, Supabase integration once added) does not require any native module outside Expo Go's built-in set.
+
+**This will change when Bluetooth is added.** BLE requires a native module (e.g. `react-native-ble-plx`), which Expo Go does not support. At that point, the project must move to an **Expo Dev Build**. This is expected, not a mistake if it happens — it's a planned step once BLE/WiFi provisioning work begins.
+
+### Migrating to Dev Build (when needed)
 
 ```bash
-npm run reset-project
+npx expo install expo-dev-client
+# for cloud builds:
+eas build --profile development --platform android
+# or, for local builds:
+npx expo run:android
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+After this, run `npx expo start` as usual — it will open in the custom dev build app instead of Expo Go. No changes to existing screens/components are required for this migration; it only affects how the app is launched during development.
 
-## Learn more
+- **Android:** Dev builds install directly over USB or the same WiFi network, no extra registration.
+- **iOS:** Requires a Mac + Xcode, or EAS Build's cloud service (since no local Mac is available). Also requires a paid Apple Developer account, and every test iPhone must be registered by device ID before its first build — do this early, not close to a deadline.
 
-To learn more about developing your project with Expo, look at the following resources:
+---
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## New Architecture
 
-## Join the community
+`newArchEnabled: true` is already set in `app.json`. This enables React Native's New Architecture (JSI), which removes the old async JS-native bridge. This matters directly for BLE: not all BLE libraries support the New Architecture yet, so **check compatibility before adding any BLE library**.
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Project Structure & Navigation (Expo Router)
+
+This project uses **Expo Router** — file-based routing, similar to Next.js. Routes are defined by the file structure inside `app/`, not by a manually configured navigator.
