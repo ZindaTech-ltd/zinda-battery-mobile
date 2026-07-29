@@ -1,11 +1,24 @@
 import { C } from '@/constants/batteryTheme';
 import { useSession } from '@/hooks/use-session';
-import { Redirect, Stack } from 'expo-router';
-import React from 'react';
+import { router, Stack, useSegments } from 'expo-router';
+import React, { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 
 export default function RootLayout() {
   const { session, loading } = useSession();
+  const segments = useSegments();
+
+  useEffect(() => {
+    if (loading) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+
+    if (!session && !inAuthGroup) {
+      router.replace('/(auth)/sign-in');
+    } else if (session && inAuthGroup) {
+      router.replace('/(tabs)');
+    }
+  }, [session, loading, segments]);
 
   if (loading) {
     return (
@@ -24,15 +37,9 @@ export default function RootLayout() {
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      {session ? (
-        <>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="modal" />
-        </>
-      ) : (
-        <Stack.Screen name="(auth)" />
-      )}
-      {!session && <Redirect href="/(auth)/sign-in" />}
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="modal" />
     </Stack>
   );
 }
