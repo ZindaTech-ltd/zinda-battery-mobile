@@ -11,7 +11,8 @@ export default function RootLayout() {
   useEffect(() => {
     if (loading) return;
 
-    const inAuthGroup = segments[0] === '(auth)';
+    const currentSegment = segments[0] as string;
+    const inAuthGroup = currentSegment === '(auth)';
 
     if (!session && !inAuthGroup) {
       router.replace('/(auth)/sign-in');
@@ -39,6 +40,7 @@ export default function RootLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(setup)" />
       <Stack.Screen name="modal" />
     </Stack>
   );
