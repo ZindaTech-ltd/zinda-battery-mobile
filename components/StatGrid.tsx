@@ -1,39 +1,44 @@
-import { C, socColor, sohColor } from "@/constants/batteryTheme";
-import { BATTERY } from "@/constants/mockBatteryData";
-import { Battery, Cog, Gauge, HeartPulse } from "lucide-react-native";
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { C, socColor, sohColor } from '@/constants/batteryTheme';
+import { BatteryReading } from '@/types/battery';
+import { Battery, Gauge, HeartPulse, Zap } from 'lucide-react-native';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
-export default function StatGrid() {
+interface Props {
+  reading: BatteryReading | null;
+}
+
+export default function StatGrid({ reading }: Props) {
+  if (!reading) return null;
   const items = [
     {
-      icon: <Battery size={16} color={socColor(BATTERY.soc)} />,
-      value: `${BATTERY.soc}%`,
-      label: "State of Charge",
+      icon: <Battery size={22} color={socColor(reading.soc)} />,
+      value: `${reading.soc.toFixed(0)}%`,
+      label: 'State of Charge',
     },
     {
-      icon: <HeartPulse size={16} color={sohColor(BATTERY.soh)} />,
-      value: `${BATTERY.soh}%`,
-      label: "State of Health",
+      icon: <HeartPulse size={22} color={sohColor(reading.soh)} />,
+      value: `${reading.soh.toFixed(0)}%`,
+      label: 'State of Health',
     },
     {
-      icon: <Cog size={16} color={C.blue} />,
-      value: `${BATTERY.current} A`,
-      label: "Net Current",
+      icon: <Zap size={22} color={C.amber} />,
+      value: `${reading.current.toFixed(2)} A`,
+      label: 'Current',
     },
     {
-      icon: <Gauge size={16} color={C.blue} />,
-      value: `${BATTERY.voltage.toFixed(2)} V`,
-      label: "Voltage",
+      icon: <Gauge size={22} color={C.blue} />,
+      value: `${reading.voltage.toFixed(2)} V`,
+      label: 'Voltage',
     },
   ];
   return (
     <View style={grid.wrap}>
-      {items.map((it, i) => (
-        <View key={i} style={grid.cell}>
-          {it.icon}
-          <Text style={grid.value}>{it.value}</Text>
-          <Text style={grid.label}>{it.label}</Text>
+      {items.map((item, index) => (
+        <View key={index} style={grid.cell}>
+          {item.icon}
+          <Text style={grid.value}>{item.value}</Text>
+          <Text style={grid.label}>{item.label}</Text>
         </View>
       ))}
     </View>
@@ -42,25 +47,34 @@ export default function StatGrid() {
 
 const grid = StyleSheet.create({
   wrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     marginHorizontal: 20,
     marginTop: 12,
     gap: 10,
   },
+
   cell: {
-    width: "47%",
+    width: '47%',
     backgroundColor: C.surface,
     borderRadius: 14,
-    padding: 14,
-    alignItems: "center",
+    paddingVertical: 18,
+    paddingHorizontal: 12,
+    alignItems: 'center',
   },
+
   value: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: C.ink,
     marginTop: 10,
-    fontVariant: ["tabular-nums"],
+    fontSize: 18,
+    fontWeight: '800',
+    color: C.ink,
+    fontVariant: ['tabular-nums'],
   },
-  label: { fontSize: 11, color: C.muted, marginTop: 3 },
+
+  label: {
+    marginTop: 4,
+    fontSize: 11,
+    color: C.muted,
+    textAlign: 'center',
+  },
 });

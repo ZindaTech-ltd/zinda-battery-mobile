@@ -1,25 +1,34 @@
+import { C } from '@/constants/batteryTheme';
+import { VoltageTrendPoint } from '@/types/battery';
 import { TrendingUp } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Line, Path, Text as SvgText } from 'react-native-svg';
-import { C } from '../../constants/batteryTheme';
-import { VOLTAGE_TREND } from '../../constants/mockBatteryData';
 
 export default function VoltageTrendChart({
-  data = VOLTAGE_TREND,
+  data,
 }: {
-  data?: number[];
+  data: VoltageTrendPoint[];
 }) {
+  if (data.length < 2) {
+    return (
+      <Text style={trend.empty}>
+        Not enough readings yet to show a trend — check back soon.
+      </Text>
+    );
+  }
+
+  const voltages = data.map((d) => d.voltage);
   const width = 335;
   const height = 180;
   const padX = 16;
   const padY = 16;
-  const min = Math.min(...data);
-  const max = Math.max(...data);
+  const min = Math.min(...voltages);
+  const max = Math.max(...voltages);
   const span = max - min || 1;
 
-  const points = data.map((v, i) => {
-    const x = padX + (i / (data.length - 1)) * (width - padX * 2);
+  const points = voltages.map((v, i) => {
+    const x = padX + (i / (voltages.length - 1)) * (width - padX * 2);
     const y = height - padY - ((v - min) / span) * (height - padY * 2);
     return { x, y };
   });
@@ -64,7 +73,7 @@ export default function VoltageTrendChart({
             fontWeight="700"
             fill={C.ink}
           >
-            {data[data.length - 1].toFixed(2)}V
+            {voltages[voltages.length - 1].toFixed(2)}V
           </SvgText>
         </Svg>
         <View style={trend.rangeRow}>
@@ -72,7 +81,7 @@ export default function VoltageTrendChart({
           <Text style={trend.rangeLabel}>Max {max.toFixed(2)}V</Text>
         </View>
       </View>
-      <Text style={trend.note}>Sample Readings</Text>
+      <Text style={trend.note}>{data.length} readings in the last 24h</Text>
     </View>
   );
 }
@@ -107,5 +116,12 @@ const trend = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 14,
     lineHeight: 16,
+  },
+  empty: {
+    marginHorizontal: 20,
+    fontSize: 13,
+    color: C.muted,
+    textAlign: 'center',
+    paddingVertical: 40,
   },
 });
