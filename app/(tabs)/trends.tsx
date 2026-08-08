@@ -2,6 +2,7 @@ import DashboardHeader from '@/components/DashboardHeader';
 import NoDeviceState from '@/components/NoDeviceState';
 import { useHasDevice } from '@/hooks/use-devices';
 import { useSession } from '@/hooks/use-session';
+import { useBatteryData } from '@/hooks/useBatteryData';
 import React from 'react';
 import { ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import VoltageTrendChart from '../../components/battery/VoltageTrendChart';
@@ -10,6 +11,7 @@ import { C } from '../../constants/batteryTheme';
 export default function TrendsScreen() {
   const { session } = useSession();
   const hasDevice = useHasDevice(session);
+  const battery = useBatteryData();
 
   if (hasDevice === false) {
     return (
@@ -20,7 +22,10 @@ export default function TrendsScreen() {
   return (
     <View style={s.root}>
       <StatusBar barStyle="dark-content" backgroundColor={C.bg} />
-      <DashboardHeader />
+      <DashboardHeader
+        device={battery.device}
+        latestReading={battery.latestReading}
+      />
       <ScrollView
         contentContainerStyle={s.scroll}
         showsVerticalScrollIndicator={false}

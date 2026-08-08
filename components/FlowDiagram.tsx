@@ -1,5 +1,5 @@
 import { C, socColor } from '@/constants/batteryTheme';
-import { BATTERY } from '@/constants/mockBatteryData';
+import { BatteryReading } from '@/types/battery';
 import { Battery, Cog, Lightbulb } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -9,6 +9,10 @@ import {
   Text,
   View,
 } from 'react-native';
+
+interface Props {
+  reading: BatteryReading | null;
+}
 
 function FlowDot({ active, color }: { active: boolean; color: string }) {
   const [trackWidth, setTrackWidth] = useState(0);
@@ -44,7 +48,9 @@ function FlowDot({ active, color }: { active: boolean; color: string }) {
             key={i}
             style={[
               flow.dash,
-              { backgroundColor: active ? color + '66' : C.faint },
+              {
+                backgroundColor: active ? color + '66' : C.faint,
+              },
             ]}
           />
         ))}
@@ -53,7 +59,10 @@ function FlowDot({ active, color }: { active: boolean; color: string }) {
         <Animated.View
           style={[
             flow.movingDot,
-            { backgroundColor: color, transform: [{ translateX }] },
+            {
+              backgroundColor: color,
+              transform: [{ translateX }],
+            },
           ]}
         />
       )}
@@ -74,15 +83,25 @@ function FlowNode({
 }) {
   return (
     <View style={flow.node}>
-      <View style={[flow.iconRing, { borderColor: color }]}>{icon}</View>
+      <View
+        style={[
+          flow.iconRing,
+          {
+            borderColor: color,
+          },
+        ]}
+      >
+        {icon}
+      </View>
       <Text style={flow.value}>{value}</Text>
       <Text style={flow.label}>{label}</Text>
     </View>
   );
 }
 
-export default function FlowDiagram() {
-  const running = BATTERY.engineOn;
+export default function FlowDiagram({ reading }: Props) {
+  if (!reading) return null;
+  const running = reading.engine_on;
   return (
     <View style={flow.card}>
       <View style={flow.row}>
@@ -94,23 +113,23 @@ export default function FlowDiagram() {
         />
         <FlowDot active={running} color={C.blue} />
         <FlowNode
-          icon={<Battery size={20} color={socColor(BATTERY.soc)} />}
+          icon={<Battery size={18} color={socColor(reading.soc)} />}
           label="BATTERY"
-          value={`${BATTERY.soc}%`}
-          color={socColor(BATTERY.soc)}
+          value={`${reading.soc}%`}
+          color={socColor(reading.soc)}
         />
-        <FlowDot active={running} color={C.amber} />
+        <FlowDot active={true} color={C.amber} />
         <FlowNode
           icon={<Lightbulb size={18} color={C.amber} />}
           label="LOAD"
-          value={`${BATTERY.power} W`}
+          value={`${reading.power.toFixed(0)} W`}
           color={C.amber}
         />
       </View>
       <Text style={flow.caption}>
         {running
           ? 'Alternator charging the battery while onboard electronics draw power'
-          : 'Engine off — battery is the sole power source for connected loads'}
+          : 'Engine off — battery powers connected loads'}
       </Text>
     </View>
   );
@@ -153,14 +172,17 @@ const flow = StyleSheet.create({
     flex: 0.7,
     height: 44,
     justifyContent: 'center',
-    marginTop: 22 - 8,
+    marginTop: 14,
   },
   dashRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
   },
-  dash: { width: 4, height: 2, borderRadius: 1 },
+  dash: {
+    width: 4,
+    height: 2,
+    borderRadius: 1,
+  },
   movingDot: {
     position: 'absolute',
     width: 6,
@@ -173,6 +195,5 @@ const flow = StyleSheet.create({
     color: C.muted,
     textAlign: 'center',
     marginTop: 18,
-    paddingHorizontal: 8,
   },
 });

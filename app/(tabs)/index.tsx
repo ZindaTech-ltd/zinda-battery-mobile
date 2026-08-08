@@ -7,34 +7,57 @@ import StatGrid from '@/components/StatGrid';
 import { C } from '@/constants/batteryTheme';
 import { useHasDevice } from '@/hooks/use-devices';
 import { useSession } from '@/hooks/use-session';
-import { supabase } from '@/utils/supabase';
+import { useBatteryData } from '@/hooks/useBatteryData';
 import React from 'react';
-import { ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+
+import {
+  ActivityIndicator,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  View,
+} from 'react-native';
 
 export default function LiveMonitor() {
   const { session } = useSession();
   const hasDevice = useHasDevice(session);
-
+  const battery = useBatteryData();
   if (hasDevice === false) {
     return (
       <NoDeviceState message="Connect your ZindaBattery monitor to start seeing live data." />
     );
   }
-  supabase.auth
-    .getSession()
-    .then(({ data }) => console.log('TOKEN:', data.session?.access_token));
+
+  if (battery.loading) {
+    return (
+      <View
+        style={[
+          s.root,
+          {
+            justifyContent: 'center',
+            alignItems: 'center',
+          },
+        ]}
+      >
+        <ActivityIndicator size="large" color={C.blue} />
+      </View>
+    );
+  }
   return (
     <View style={s.root}>
       <StatusBar barStyle="dark-content" backgroundColor={C.bg} />
-      <DashboardHeader />
+      <DashboardHeader
+        device={battery.device}
+        latestReading={battery.latestReading}
+      />
       <ScrollView
         contentContainerStyle={s.scroll}
         showsVerticalScrollIndicator={false}
       >
-        <FlowDiagram />
-        <InfoStrip />
-        <StatGrid />
-        <AlertBanner />
+        <FlowDiagram reading={battery.latestReading} />
+        <InfoStrip reading={battery.latestReading} />
+        <StatGrid reading={battery.latestReading} />
+        <AlertBanner reading={battery.latestReading} />
         <View style={{ height: 24 }} />
       </ScrollView>
     </View>
@@ -42,6 +65,12 @@ export default function LiveMonitor() {
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: C.bg },
-  scroll: { paddingTop: 10 },
+  root: {
+    flex: 1,
+    backgroundColor: C.bg,
+  },
+
+  scroll: {
+    paddingTop: 10,
+  },
 });
