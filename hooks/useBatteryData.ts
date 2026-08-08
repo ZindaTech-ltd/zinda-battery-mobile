@@ -105,15 +105,15 @@ export function useBatteryData(): BatteryDashboardData {
                     d.max = Math.max(d.max, row.voltage);
                 }
             });
-
+            // now we have a map of date -> { min, max } for each day, we can convert it to an array of VoltageHistoryItem
             const history: VoltageHistoryItem[] = [...grouped.entries()]
-                .slice(0, 6)
+                .slice(0, 6) // only keep the last 6 days
                 .map(([date, value]) => ({
                     date,
                     min: value.min,
                     max: value.max,
 
-                    flag: value.min < 11.8,
+                    flag: value.min < 11.8, // flag if the min voltage is below 11.8V
                 }));
 
             setVoltageHistory(history);

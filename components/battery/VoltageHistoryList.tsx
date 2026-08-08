@@ -1,23 +1,39 @@
 import { C } from '@/constants/batteryTheme';
-import { HISTORY } from '@/constants/mockBatteryData';
+import { VoltageHistoryItem } from '@/types/battery';
+import { formatHistoryLabel } from '@/utils/format-date';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-export default function VoltageHistoryList() {
-  const globalMin = Math.min(...HISTORY.map((h) => h.min));
-  const globalMax = Math.max(...HISTORY.map((h) => h.max));
-  const span = globalMax - globalMin;
+export default function VoltageHistoryList({
+  history,
+}: {
+  history: VoltageHistoryItem[];
+}) {
+  // if there are no readings yet, show a message of no readings
+  if (history.length === 0) {
+    return (
+      <Text style={hist.empty}>
+        No readings yet — check back after your device sends data.
+      </Text>
+    );
+  }
+  // find the global min and max voltage across all days to scale the bar charts
+  const globalMin = Math.min(...history.map((h) => h.min));
+  const globalMax = Math.max(...history.map((h) => h.max));
+  const span = globalMax - globalMin || 1;
 
   return (
     <View>
-      <Text style={hist.sectionTitle}>Voltage Range · Last 6 Days</Text>
+      <Text style={hist.sectionTitle}>
+        Voltage Range · Last {history.length} Day{history.length > 1 ? 's' : ''}
+      </Text>
       <View style={hist.list}>
-        {HISTORY.map((h, i) => {
+        {history.map((h, i) => {
           const lowPct = ((h.min - globalMin) / span) * 100;
           const highPct = ((h.max - globalMin) / span) * 100;
           return (
             <View key={i} style={hist.row}>
-              <Text style={hist.day}>{h.date}</Text>
+              <Text style={hist.day}>{formatHistoryLabel(h.date)}</Text>
               <View style={hist.track}>
                 <View
                   style={[
@@ -70,4 +86,11 @@ const hist = StyleSheet.create({
   },
   rangeText: { fontSize: 11, color: C.muted, fontWeight: '600' },
   flagText: { fontSize: 11, color: C.red, fontWeight: '700' },
+  empty: {
+    marginHorizontal: 20,
+    fontSize: 13,
+    color: C.muted,
+    textAlign: 'center',
+    paddingVertical: 40,
+  },
 });

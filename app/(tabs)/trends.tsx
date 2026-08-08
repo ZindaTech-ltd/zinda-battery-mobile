@@ -4,7 +4,13 @@ import { useHasDevice } from '@/hooks/use-devices';
 import { useSession } from '@/hooks/use-session';
 import { useBatteryData } from '@/hooks/useBatteryData';
 import React from 'react';
-import { ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  View,
+} from 'react-native';
 import VoltageTrendChart from '../../components/battery/VoltageTrendChart';
 import { C } from '../../constants/batteryTheme';
 
@@ -30,7 +36,11 @@ export default function TrendsScreen() {
         contentContainerStyle={s.scroll}
         showsVerticalScrollIndicator={false}
       >
-        <VoltageTrendChart />
+        {battery.loading ? (
+          <ActivityIndicator color={C.blue} style={{ marginTop: 40 }} />
+        ) : (
+          <VoltageTrendChart data={battery.voltageTrend} />
+        )}
         <View style={{ height: 24 }} />
       </ScrollView>
     </View>
